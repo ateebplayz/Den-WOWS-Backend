@@ -13,7 +13,7 @@ export class AdminKeyGuard implements CanActivate {
     const base64Credentials = authHeader.split(' ')[1];
     const [username, password] = Buffer.from(base64Credentials, 'base64').toString().split(':');
 
-    if (username !== 'admin' || password !== process.env.ADMIN_KEY) {
+    if (username !== 'fakharzaman' || password !== process.env.ADMIN_KEY) {
       throw new UnauthorizedException('Invalid admin credentials');
     }
 
