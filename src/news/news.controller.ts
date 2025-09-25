@@ -1,10 +1,21 @@
-import {Body, Controller, Get, InternalServerErrorException, Post, UseGuards} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  InternalServerErrorException,
+  Param,
+  Patch,
+  Post,
+  UseGuards
+} from '@nestjs/common';
 import {NewsService} from "./news.service";
 import {AdminKeyGuard} from "../auth/admin-key.guard";
 import {CreateNewsDto} from "./dto/create-news.dto";
 import {JwtAuthGuard} from "../auth/jwt-auth.guard";
 import {FlagsService} from "../flags/flags.service";
 import {News} from "./schemas/news.schema";
+import {UpdateNewsDto} from "./dto/update-news.dto";
 
 @Controller('news')
 export class NewsController {
@@ -47,6 +58,19 @@ export class NewsController {
   @UseGuards(AdminKeyGuard)
   createNews(@Body() createNewsDto: CreateNewsDto) {
     return this.newsService.createNews(createNewsDto)
+  }
+
+
+  @Patch(':id')
+  @UseGuards(AdminKeyGuard)
+  updateNews(@Param('id') id: string, @Body() updateNewsDto: UpdateNewsDto) {
+    return this.newsService.updateNews(id, updateNewsDto)
+  }
+
+  @Delete(':id')
+  @UseGuards(AdminKeyGuard)
+  deleteNews(@Param('id') id: string) {
+    return this.newsService.deleteNews(id)
   }
 }
 

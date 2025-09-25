@@ -29,15 +29,18 @@ export class FlagsService {
 
   async pause() {
     const flag = await this.flagModel.findOne({ key: 'global' }).exec();
-    this.flagModel.findOneAndUpdate(
-      { key: 'global' },
-      { value: false},
-      { upsert: true, new: true },
-    )
     return this.flagModel.findOneAndUpdate(
       { key: 'global' },
-      { $inc: { accumulatedSeconds: Number(((Date.now() - (flag ? flag.startedAt : 0)) / 1000).toFixed(0)) }},
-    )
+      {
+        value: false,
+        $inc: {
+          accumulatedSeconds: Number(
+            ((Date.now() - (flag ? flag.startedAt : 0)) / 1000).toFixed(0)
+          ),
+        },
+      },
+      { upsert: true, new: true },
+    );
   }
 
   async getFullFlag(key: string): Promise<Flag | null> {

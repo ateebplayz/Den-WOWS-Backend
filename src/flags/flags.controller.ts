@@ -18,6 +18,12 @@ export class FlagsController {
     return this.flagsService.pause()
   }
 
+  @Get('/global')
+  @UseGuards(AdminKeyGuard)
+  async getGlobal() {
+    return this.flagsService.getFullFlag('global')
+  }
+
   @Get()
   async getFlags() {
     return this.flagsService.getAllFlags();
