@@ -19,7 +19,6 @@ export class FlagsController {
   }
 
   @Get('/global')
-  @UseGuards(AdminKeyGuard)
   async getGlobal() {
     return this.flagsService.getFullFlag('global')
   }

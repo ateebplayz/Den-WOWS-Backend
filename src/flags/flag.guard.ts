@@ -14,7 +14,6 @@ export class FeatureFlagGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    console.log('a')
     const key = this.reflector.get<string>(FEATURE_FLAG_KEY, context.getHandler());
     if (!key) return true; // route does not require a flag
 

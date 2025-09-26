@@ -16,6 +16,7 @@ import {JwtAuthGuard} from "../auth/jwt-auth.guard";
 import {FlagsService} from "../flags/flags.service";
 import {News} from "./schemas/news.schema";
 import {UpdateNewsDto} from "./dto/update-news.dto";
+import {FeatureFlagGuard, RequireFlag} from "../flags/flag.guard";
 
 @Controller('news')
 export class NewsController {
@@ -32,6 +33,8 @@ export class NewsController {
 
   @Get('')
   @UseGuards(JwtAuthGuard)
+  @RequireFlag('global')
+  @UseGuards(FeatureFlagGuard)
   async getNews() {
     const allNews = await this.newsService.getNews();
     const flag = await this.flagsService.getFullFlag('global')
@@ -41,17 +44,58 @@ export class NewsController {
       const triggered: News[] = [];
       let accumulatedTime = 0;
 
-      for (const item of sorted) {
-        accumulatedTime += item.effectAt;
-        if (accumulatedTime <= flag.accumulatedSeconds) {
-          triggered.push(item);
+      const elapsedSeconds = Math.floor(
+        (Date.now() - new Date(flag.startedAt).getTime()) / 1000
+      );
+
+      for (let i = 0; i < sorted.length; i++) {
+        accumulatedTime += sorted[i].effectAt;
+
+        if (accumulatedTime <= elapsedSeconds) {
+          triggered.push(sorted[i]);
         } else {
+          triggered.push(sorted[i]);
           break;
         }
       }
 
-      return triggered
-    } else throw new InternalServerErrorException();
+      triggered.forEach(t => (t.effects = []));
+      return triggered;
+    } else {
+      throw new InternalServerErrorException();
+    }
+  }
+
+
+  @Get('/time-left')
+  @UseGuards(JwtAuthGuard)
+  @RequireFlag('global')
+  @UseGuards(FeatureFlagGuard)
+  async getTimeLeft() {
+    const allNews = await this.newsService.getNews();
+    const flag = await this.flagsService.getFullFlag('global');
+
+    if (!flag) throw new InternalServerErrorException();
+
+    const sorted = [...allNews].sort((a, b) => a.sequence - b.sequence);
+    let accumulatedTime = 0;
+
+    const elapsedSeconds = Math.floor(
+      (Date.now() - new Date(flag.startedAt).getTime()) / 1000
+    );
+
+    for (let i = 0; i < sorted.length; i++) {
+      accumulatedTime += sorted[i].effectAt;
+
+      if (accumulatedTime > elapsedSeconds) {
+        // found the "next" item
+        const timeLeft = accumulatedTime - elapsedSeconds;
+        return { timeLeft };
+      }
+    }
+
+    // If we've already passed all news items, nothing left
+    return { timeLeft: 0 };
   }
 
   @Post('')

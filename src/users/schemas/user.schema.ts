@@ -12,7 +12,7 @@ export class User {
   @Prop({ required: true })
   password: string; // hashed
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: Number })
   balance: number;
 
   @Prop()

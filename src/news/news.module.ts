@@ -9,5 +9,6 @@ import {FlagsModule} from "../flags/flags.module";
   imports: [MongooseModule.forFeature([{ name: News.name, schema: NewsSchema }]), FlagsModule],
   controllers: [NewsController],
   providers: [NewsService],
+  exports: [NewsService],
 })
 export class NewsModule {}

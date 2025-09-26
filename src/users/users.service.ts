@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import {UpdateUserDto} from "./dto/update-user.dto";
+import {Stock, StocksDocument} from "../stocks/schemas/stocks.schema";
 
 @Injectable()
 export class UsersService {
@@ -26,6 +27,41 @@ export class UsersService {
     const obj = saved.toObject();
     obj.password = '';
     return obj;
+  }
+
+  async decrementBalance(id: string, amount: number){
+    return this.userModel.findOneAndUpdate(
+      { _id: new Types.ObjectId(id) },
+      { $inc: { balance: -amount } },
+    )
+  }
+
+  async incrementBalance(id: string, amount: number){
+    return this.userModel.findOneAndUpdate(
+      { _id: new Types.ObjectId(id) },
+      { $inc
+          : { balance: amount } },
+    )
+  }
+
+  async updateStock(user: UserDocument, stock: StocksDocument, amount: number) {
+    const userWStocks = user
+    const stockIndex = userWStocks.stocksOwned.findIndex(s => s.id == (stock._id as Types.ObjectId).toHexString())
+    if (stockIndex >= 0) {
+      userWStocks.stocksOwned[stockIndex].amount += amount
+      userWStocks.stocksOwned[stockIndex].boughtAt = new Date()
+      userWStocks.stocksOwned[stockIndex].buy = stock.price
+    } else {
+      userWStocks.stocksOwned.push(
+        {
+          id: (stock._id as Types.ObjectId).toHexString(),
+          amount,
+          boughtAt: new Date(),
+          buy: stock.price
+        }
+      )
+    }
+    return this.userModel.updateOne({ _id : user._id }, { $set: userWStocks})
   }
 
   async delete(id: string): Promise<DeleteResult> {
