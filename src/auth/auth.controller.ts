@@ -23,8 +23,6 @@ export class AuthController {
     return { user };
   }
 
-  @RequireFlag('global')
-  @UseGuards(FeatureFlagGuard)
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(@Body() body: LoginDto) {
