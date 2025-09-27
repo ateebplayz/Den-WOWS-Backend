@@ -47,7 +47,40 @@ export class StocksService {
         }
       }
       for (const stock of stocks) {
-        stock.priceHistory = [100, ...stock.priceHistory];
+        let price = 100
+        switch ((stock._id as Types.ObjectId).toHexString()) {
+          case "68d59ff665b970d1077c4e96":
+            price = 25
+            break;
+          case "68d5a01265b970d1077c4e9c":
+            price = 55
+            break;
+          case "68d5a02a65b970d1077c4ea1":
+            price = 0.5
+            break;
+          case "68d5a03c65b970d1077c4ea4":
+            price = 3
+            break;
+          case "68d5a04c65b970d1077c4ea7":
+            price = 45
+            break;
+          case "68d5a05b65b970d1077c4eaa":
+            price = 5
+            break;
+          case "68d5a06965b970d1077c4ead":
+            price = 15
+            break;
+          case "68d5a07f65b970d1077c4eb0":
+            price = 20
+            break;
+          case "68d5a09465b970d1077c4eb3":
+            price = 600
+            break;
+          case "68d5a0ae65b970d1077c4eb6":
+            price = 1
+            break;
+        }
+        stock.priceHistory = [price, ...stock.priceHistory];
       }
       return stocks
     } else throw new InternalServerErrorException();
